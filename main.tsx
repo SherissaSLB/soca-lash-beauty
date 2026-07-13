@@ -1,9 +1,33 @@
-import { StrictMode, useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import {
+  StrictMode,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 const BOOKING_URL = "https://socalashbeauty.glossgenius.com/";
 const INSTAGRAM_URL = "https://www.instagram.com/socalashbeauty";
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function assetPath(fileName: string) {
+  return new URL(`../assets/${fileName}`, import.meta.url).href;
+}
+
+function appPath(path: string) {
+  return `${BASE_PATH}${path}` || "/";
+}
+
+function stripBasePath(pathname: string) {
+  if (!BASE_PATH || !pathname.startsWith(BASE_PATH)) {
+    return pathname;
+  }
+
+  return pathname.slice(BASE_PATH.length) || "/";
+}
 
 type LashSet = {
   label: string;
@@ -85,7 +109,7 @@ const lashSets: LashSet[] = [
     duration: "120 min",
     deposit: "$20 deposit",
     cta: "Book Classic",
-    image: "/assets/classic-1.jpeg",
+    image: assetPath("classic-1.jpeg"),
     imageClass: "classic-frame",
     alt: "Classic lash extension set with soft natural definition",
   },
@@ -99,7 +123,7 @@ const lashSets: LashSet[] = [
     duration: "130 min",
     deposit: "$20 deposit",
     cta: "Book Volume",
-    image: "/assets/volume-set.jpeg",
+    image: assetPath("volume-set.jpeg"),
     imageClass: "volume-frame",
     alt: "Volume lash extension set with soft glam fullness",
   },
@@ -113,7 +137,7 @@ const lashSets: LashSet[] = [
     duration: "120 min",
     deposit: "$20 deposit",
     cta: "Book Wet Set",
-    image: "/assets/wet-set-1.jpeg",
+    image: assetPath("wet-set-1.jpeg"),
     imageClass: "wet-frame",
     alt: "Textured wet set lash extensions close up",
   },
@@ -127,7 +151,7 @@ const lashSets: LashSet[] = [
     duration: "130 min",
     deposit: "$20 deposit",
     cta: "Book Anime",
-    image: "/assets/anime-set-1.jpeg",
+    image: assetPath("anime-set-1.jpeg"),
     imageClass: "anime-frame",
     alt: "Anime lash extension styling on a client",
   },
@@ -141,7 +165,7 @@ const lashSets: LashSet[] = [
     duration: "135 min",
     deposit: "$20 deposit",
     cta: "Book Medusa",
-    image: "/assets/medusa-1.jpeg",
+    image: assetPath("medusa-1.jpeg"),
     imageClass: "medusa-frame",
     alt: "Bold Medusa lash styling detail",
   },
@@ -194,40 +218,41 @@ const addOns: Service[] = [
 ];
 
 const heroShowcase = [
-  ["/assets/medusa-4.png", "Bold Medusa lash set portrait"],
-  ["/assets/wet-set-2.png", "Wet set lash detail"],
-  ["/assets/medusa-1.jpeg", "Medusa lash set portrait"],
+  [assetPath("medusa-4.png"), "Bold Medusa lash set portrait"],
+  [assetPath("wet-set-2.png"), "Wet set lash detail"],
+  [assetPath("medusa-1.jpeg"), "Medusa lash set portrait"],
 ] as const;
 
 const galleryGroups: GalleryGroup[] = [
   {
     title: "Classic",
     images: [
-      ["/assets/classic-2.jpeg", "Classic lash set detail"],
-      ["/assets/classic-3.jpg", "Classic lash set result"],
+      [assetPath("classic-2.jpeg"), "Classic lash set detail"],
+      [assetPath("classic-3.jpg"), "Classic lash set result"],
     ],
   },
   {
     title: "Wet Set",
-    images: [["/assets/wet-set-3.jpeg", "Wet set lash result"]],
+    images: [[assetPath("wet-set-3.jpeg"), "Wet set lash result"]],
   },
   {
     title: "Anime",
     images: [
-      ["/assets/anime-set-2.jpg", "Anime lash set detail"],
-      ["/assets/anime-set-3.jpeg", "Anime lash set result"],
+      [assetPath("anime-set-2.jpg"), "Anime lash set detail"],
+      [assetPath("anime-set-3.jpeg"), "Anime lash set result"],
     ],
   },
   {
     title: "Medusa",
-    images: [["/assets/medusa-3.jpeg", "Medusa lash set detail"]],
+    images: [[assetPath("medusa-3.jpeg"), "Medusa lash set detail"]],
   },
 ];
 
 const socialImages = galleryGroups.flatMap((group) => group.images).slice(0, 5);
 
 function normalizePath(pathname: string): LocationState["pathname"] {
-  return pathname === "/new-clients" ? "/new-clients" : "/";
+  pathname = stripBasePath(pathname);
+  return pathname.endsWith("/new-clients") ? "/new-clients" : "/";
 }
 
 function getCurrentLocation(): LocationState {
@@ -302,7 +327,7 @@ function SiteLink({
 
 function PalmLogo() {
   return (
-    <img className="palm-logo" src="/assets/soca-palm-logo.png" alt="" aria-hidden="true" />
+    <img className="palm-logo" src={assetPath("soca-palm-logo.png")} alt="" aria-hidden="true" />
   );
 }
 
@@ -317,7 +342,7 @@ function Header({
     <header className="site-header">
       <SiteLink
         className="brand"
-        href="/"
+        href={appPath("/")}
         ariaLabel="Soca Lash Beauty home"
         onNavigate={onNavigate}
       >
@@ -327,25 +352,25 @@ function Header({
       <nav aria-label="Main navigation">
         <SiteLink
           className={location.pathname === "/" && location.hash === "#lash-sets" ? "active" : undefined}
-          href="/#lash-sets"
+          href={appPath("/#lash-sets")}
           onNavigate={onNavigate}
         >
           Lash Sets
         </SiteLink>
         <SiteLink
           className={location.pathname === "/new-clients" ? "active" : undefined}
-          href="/new-clients"
+          href={appPath("/new-clients")}
           onNavigate={onNavigate}
         >
           New Clients
         </SiteLink>
-        <SiteLink href="/#maintenance" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#maintenance")} onNavigate={onNavigate}>
           Maintenance
         </SiteLink>
-        <SiteLink href="/#gallery" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#gallery")} onNavigate={onNavigate}>
           Gallery
         </SiteLink>
-        <SiteLink href="/#policies" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#policies")} onNavigate={onNavigate}>
           Policies
         </SiteLink>
       </nav>
@@ -383,7 +408,7 @@ function HomePage({
             </p>
             <div className="hero-actions">
               <BookingLink>Book Your First Set</BookingLink>
-              <SiteLink className="button secondary" href="/new-clients" onNavigate={onNavigate}>
+              <SiteLink className="button secondary" href={appPath("/new-clients")} onNavigate={onNavigate}>
                 View New Client Offer
               </SiteLink>
             </div>
@@ -427,7 +452,7 @@ function HomePage({
                 pricing on your first full set.
               </p>
             </div>
-            <SiteLink className="button secondary" href="/new-clients" onNavigate={onNavigate}>
+            <SiteLink className="button secondary" href={appPath("/new-clients")} onNavigate={onNavigate}>
               Explore the New Client Experience
             </SiteLink>
           </article>
@@ -522,7 +547,7 @@ function HomePage({
         <section className="founder section">
           <img
             className="founder-photo"
-            src="/assets/sherissa-redhead.jpg"
+            src={assetPath("sherissa-redhead.jpg")}
             alt="Sherissa Redhead, founder of Soca Lash Beauty"
           />
           <div>
@@ -672,7 +697,10 @@ function HomePage({
           </form>
         </section>
 
-        <section className="final-cta">
+        <section
+          className="final-cta"
+          style={{ "--final-logo": `url("${assetPath("soca-palm-logo.png")}")` } as CSSProperties}
+        >
           <p className="eyebrow">Book Your Appointment</p>
           <h2>Ready for your first set?</h2>
           <p>
@@ -681,7 +709,7 @@ function HomePage({
           </p>
           <div className="hero-actions">
             <BookingLink>Book Your First Set</BookingLink>
-            <SiteLink className="button secondary" href="/#lash-sets" onNavigate={onNavigate}>
+            <SiteLink className="button secondary" href={appPath("/#lash-sets")} onNavigate={onNavigate}>
               View Lash Sets
             </SiteLink>
           </div>
@@ -714,7 +742,7 @@ function NewClientsPage({ onNavigate }: { onNavigate: (href: string) => void }) 
             appointment, standard service and maintenance pricing will apply.
           </p>
           <div className="hero-actions centered-actions">
-            <SiteLink className="button primary" href="/new-clients#first-time-offers" onNavigate={onNavigate}>
+            <SiteLink className="button primary" href={appPath("/new-clients#first-time-offers")} onNavigate={onNavigate}>
               View First-Time Offers
             </SiteLink>
             <BookingLink className="button secondary">Book a Consultation</BookingLink>
@@ -753,7 +781,7 @@ function NewClientsPage({ onNavigate }: { onNavigate: (href: string) => void }) 
             service may be adjusted following consultation based on the condition and suitability
             of the client’s natural lashes.
           </p>
-          <SiteLink className="terms-link" href="/#policies" onNavigate={onNavigate}>
+          <SiteLink className="terms-link" href={appPath("/#policies")} onNavigate={onNavigate}>
             View booking policies
           </SiteLink>
         </aside>
@@ -780,7 +808,7 @@ function Footer({ onNavigate }: { onNavigate: (href: string) => void }) {
   return (
     <footer>
       <div>
-        <SiteLink className="brand" href="/" onNavigate={onNavigate}>
+        <SiteLink className="brand" href={appPath("/")} onNavigate={onNavigate}>
           <PalmLogo />
           <span>Soca Lash Beauty</span>
         </SiteLink>
@@ -791,19 +819,19 @@ function Footer({ onNavigate }: { onNavigate: (href: string) => void }) {
       </div>
       <div>
         <h2>Explore</h2>
-        <SiteLink href="/#lash-sets" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#lash-sets")} onNavigate={onNavigate}>
           Lash Sets
         </SiteLink>
-        <SiteLink href="/new-clients" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/new-clients")} onNavigate={onNavigate}>
           New Clients
         </SiteLink>
-        <SiteLink href="/#maintenance" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#maintenance")} onNavigate={onNavigate}>
           Maintenance
         </SiteLink>
-        <SiteLink href="/#gallery" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#gallery")} onNavigate={onNavigate}>
           Gallery
         </SiteLink>
-        <SiteLink href="/#policies" onNavigate={onNavigate}>
+        <SiteLink href={appPath("/#policies")} onNavigate={onNavigate}>
           Policies
         </SiteLink>
       </div>
@@ -826,9 +854,9 @@ function App() {
       pathname: normalizePath(nextUrl.pathname),
       hash: nextUrl.hash,
     };
-    const nextPath = `${nextLocation.pathname}${nextLocation.hash}`;
+    const nextPath = `${appPath(nextLocation.pathname)}${nextLocation.hash}`;
 
-    if (nextPath !== `${location.pathname}${location.hash}`) {
+    if (nextPath !== `${appPath(location.pathname)}${location.hash}`) {
       window.history.pushState({}, "", nextPath);
     }
 
