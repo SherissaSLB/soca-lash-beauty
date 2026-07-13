@@ -14,7 +14,7 @@ const INSTAGRAM_URL = "https://www.instagram.com/socalashbeauty";
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function assetPath(fileName: string) {
-  return new URL(`../assets/${fileName}`, import.meta.url).href;
+  return `/assets/${fileName}`;
 }
 
 function appPath(path: string) {
