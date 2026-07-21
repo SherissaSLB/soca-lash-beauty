@@ -9,7 +9,7 @@ import {
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const BOOKING_URL = "https://socalashbeauty.glossgenius.com/";
+const BOOKING_URL = "https://app.squareup.com/appointments/book/rpl0o5e87wb45p/LMT9PDTKM8GFR/start";
 const INSTAGRAM_URL = "https://www.instagram.com/socalashbeauty";
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
