@@ -9,7 +9,7 @@ import {
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const BOOKING_URL = "https://socalashbeauty.glossgenius.com/";
+const BOOKING_URL = "https://app.squareup.com/appointments/book/rpl0o5e87wb45p/LMT9PDTKM8GFR/start";
 const INSTAGRAM_URL = "https://www.instagram.com/socalashbeauty";
 const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -407,9 +407,9 @@ function HomePage({
               First full set includes a complimentary lash consultation.
             </p>
             <div className="hero-actions">
-              <BookingLink>Book Your First Set</BookingLink>
-              <SiteLink className="button secondary" href={appPath("/new-clients")} onNavigate={onNavigate}>
-                View New Client Offer
+              <BookingLink>Book Your Lash Set</BookingLink>
+              <SiteLink className="button secondary" href={appPath("/#lash-sets")} onNavigate={onNavigate}>
+                View Styles & Prices
               </SiteLink>
             </div>
             <p className="hero-note">
@@ -438,24 +438,24 @@ function HomePage({
         </section>
 
         <section className="section lash-sets" id="lash-sets">
-          <div className="section-heading">
-            <p className="eyebrow">Full Sets</p>
-            <h2>Choose Your Lash Set</h2>
-            <p>Each set is customized to your eye shape, natural lashes and desired look.</p>
-          </div>
           <article className="new-client-teaser">
             <div>
               <p className="eyebrow">First Appointment</p>
               <h3>New to Soca Lash Beauty?</h3>
               <p>
-                Begin with a complimentary lash consultation and access selected first-time
-                pricing on your first full set.
+                First full set includes a complimentary lash consultation and selected first-time
+                pricing.
               </p>
             </div>
             <SiteLink className="button secondary" href={appPath("/new-clients")} onNavigate={onNavigate}>
-              Explore the New Client Experience
+              View New Client Offers
             </SiteLink>
           </article>
+          <div className="section-heading">
+            <p className="eyebrow">Full Sets</p>
+            <h2>Choose Your Lash Set</h2>
+            <p>Each set is customized to your eye shape, natural lashes and desired look.</p>
+          </div>
           <div className="lash-set-grid">
             {lashSets.map((set) => (
               <article className="lash-set-card" key={set.service}>
@@ -847,6 +847,8 @@ function App() {
   const [activeGalleryFilter, setActiveGalleryFilter] =
     useState<(typeof galleryFilters)[number]>("All");
   const [location, setLocation] = useState<LocationState>(getCurrentLocation);
+  const [showMobileBooking, setShowMobileBooking] = useState(false);
+  const [serviceBookingVisible, setServiceBookingVisible] = useState(false);
 
   function navigateTo(href: string) {
     const nextUrl = new URL(href, window.location.origin);
@@ -883,6 +885,79 @@ function App() {
     });
   }, [location]);
 
+  useEffect(() => {
+    const hero = document.querySelector(".hero");
+    if (!hero) {
+      setShowMobileBooking(true);
+      return;
+    }
+    const heroElement = hero;
+
+    function updateMobileBooking() {
+      const heroBottom = heroElement.getBoundingClientRect().bottom;
+      setShowMobileBooking(heroBottom < window.innerHeight * 0.72);
+    }
+
+    updateMobileBooking();
+    window.addEventListener("scroll", updateMobileBooking, { passive: true });
+    window.addEventListener("resize", updateMobileBooking);
+    return () => {
+      window.removeEventListener("scroll", updateMobileBooking);
+      window.removeEventListener("resize", updateMobileBooking);
+    };
+  }, [location]);
+
+  useEffect(() => {
+    const serviceButtons = Array.from(document.querySelectorAll(".lash-set-card .button"));
+    if (!serviceButtons.length) {
+      setServiceBookingVisible(false);
+      return;
+    }
+
+    const visibleButtons = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visibleButtons.add(entry.target);
+          } else {
+            visibleButtons.delete(entry.target);
+          }
+        });
+        setServiceBookingVisible(visibleButtons.size > 0);
+      },
+      {
+        rootMargin: "0px 0px -18% 0px",
+        threshold: 0.6,
+      },
+    );
+
+    serviceButtons.forEach((button) => observer.observe(button));
+    return () => observer.disconnect();
+  }, [location]);
+
+  useEffect(() => {
+    const cards = Array.from(document.querySelectorAll(".lash-set-card"));
+    if (!cards.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("is-mobile-visible", entry.isIntersecting);
+        });
+      },
+      {
+        rootMargin: "0px 0px -10% 0px",
+        threshold: 0.35,
+      },
+    );
+
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [location]);
+
   return (
     <>
       <Header location={location} onNavigate={navigateTo} />
@@ -898,8 +973,16 @@ function App() {
 
       <Footer onNavigate={navigateTo} />
 
-      <div className="mobile-booking">
-        <BookingLink>Book Now</BookingLink>
+      <div
+        className={[
+          "mobile-booking",
+          showMobileBooking ? "is-visible" : "",
+          serviceBookingVisible ? "is-muted" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <BookingLink>Reserve Your Set</BookingLink>
       </div>
     </>
   );

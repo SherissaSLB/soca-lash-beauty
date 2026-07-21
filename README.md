@@ -22,7 +22,7 @@ The production build outputs to `dist`.
 The booking destination is set in `src/main.tsx`:
 
 ```ts
-const BOOKING_URL = "https://socalashbeauty.glossgenius.com/";
+const BOOKING_URL = "https://app.squareup.com/appointments/book/rpl0o5e87wb45p/LMT9PDTKM8GFR/start";
 ```
 
 Update that value when the final booking link changes.
